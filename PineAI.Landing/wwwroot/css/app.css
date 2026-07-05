@@ -30,13 +30,13 @@
     --pine-outline-variant: #c0c9bf;
 
     /* Text */
-    --pine-text:                #0e1e1b;
-    --pine-text-muted:          #404942;
+    --pine-text:                #1B2B27;
+    --pine-text-muted:          #4D6A62;
     --pine-inverse-surface:     #23342f;
     --pine-inverse-on-surface:  #e2f5ee;
 
     /* Primary */
-    --pine-primary:             #004326;
+    --pine-primary:             #1A5C3A;
     --pine-primary-dk:          #134428;
     --pine-primary-lt:          #EAF5EE;
     --pine-primary-container:   #1a5c3a;
@@ -54,7 +54,7 @@
     --pine-accent-lt: #D8F3DC;
 
     /* Gold / Tertiary */
-    --pine-gold:      #f2ba5c;
+    --pine-gold:      #C9963B;
     --pine-gold-dark: #6d4a00;
     --pine-gold-lt:   #FEF3E2;
 
@@ -69,14 +69,14 @@
     --pine-footer-muted:  #8AAEA6;
 
     /* Shadows */
-    --pine-shadow-sm: 0 2px 8px rgba(0,67,38,.08);
-    --pine-shadow-md: 0 6px 24px rgba(0,67,38,.12);
+    --pine-shadow-sm: 0 2px 8px rgba(26,92,58,.08);
+    --pine-shadow-md: 0 6px 24px rgba(26,92,58,.12);
 
     /* Radius */
-    --radius-sm:   0.25rem;
+    --radius-sm:   6px;
     --radius-md:   0.75rem;
-    --radius-lg:   1rem;
-    --radius-pill: 9999px;
+    --radius-lg:   20px;
+    --radius-pill: 2rem;
 
     /* Spacing */
     --space-xs:      4px;
