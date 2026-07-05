@@ -1,186 +1,64 @@
 ---
 name: PineAI
 colors:
-  surface: '#FFFFFF'
-  surface-dim: '#ccded8'
-  surface-bright: '#ebfef7'
-  surface-container-lowest: '#ffffff'
-  surface-container-low: '#e5f8f1'
-  surface-container: '#dff2eb'
-  surface-container-high: '#daece6'
-  surface-container-highest: '#d4e7e0'
-  on-surface: '#0e1e1b'
-  on-surface-variant: '#404942'
-  inverse-surface: '#23342f'
-  inverse-on-surface: '#e2f5ee'
-  outline: '#707971'
-  outline-variant: '#c0c9bf'
-  surface-tint: '#2a6a47'
-  primary: '#004326'
-  on-primary: '#ffffff'
-  primary-container: '#1a5c3a'
-  on-primary-container: '#91d2a7'
-  inverse-primary: '#93d5aa'
-  secondary: '#006d40'
-  on-secondary: '#ffffff'
-  secondary-container: '#8ef5b6'
-  on-secondary-container: '#007243'
-  tertiary: '#4f3500'
-  on-tertiary: '#ffffff'
-  tertiary-container: '#6d4a00'
-  on-tertiary-container: '#f2ba5c'
-  error: '#ba1a1a'
-  on-error: '#ffffff'
-  error-container: '#ffdad6'
-  on-error-container: '#93000a'
-  primary-fixed: '#aff2c4'
-  primary-fixed-dim: '#93d5aa'
-  on-primary-fixed: '#002110'
-  on-primary-fixed-variant: '#0b5131'
-  secondary-fixed: '#91f7b8'
-  secondary-fixed-dim: '#75db9e'
-  on-secondary-fixed: '#002110'
-  on-secondary-fixed-variant: '#00522f'
-  tertiary-fixed: '#ffdeac'
-  tertiary-fixed-dim: '#f5bd5e'
-  on-tertiary-fixed: '#281900'
-  on-tertiary-fixed-variant: '#604100'
-  background: '#F6F9F7'
-  on-background: '#0e1e1b'
-  surface-variant: '#d4e7e0'
-  border: '#D5E8DE'
-  text-muted: '#4D6A62'
-  primary-dark: '#134428'
-  primary-light: '#EAF5EE'
-  accent-light: '#D8F3DC'
-  gold-light: '#FEF3E2'
-  footer-bg: '#12302B'
-  footer-text: '#C5D8D3'
-  footer-muted: '#8AAEA6'
+  background: "#F6F9F7"
+  surface: "#FFFFFF"
+  border: "#D5E8DE"
+  text: "#1B2B27"
+  text-muted: "#4D6A62"
+  primary: "#1A5C3A"
+  primary-dark: "#134428"
+  primary-light: "#EAF5EE"
+  accent: "#41A870"
+  accent-light: "#D8F3DC"
+  gold: "#C9963B"
+  gold-light: "#FEF3E2"
+  footer-bg: "#12302B"
+  footer-text: "#C5D8D3"
+  footer-muted: "#8AAEA6"
+  white: "#FFFFFF"
 typography:
   h1:
-    fontFamily: beVietnamPro
-    fontSize: 44.8px
-    fontWeight: '900'
-    lineHeight: '1.25'
-  h1-mobile:
-    fontFamily: beVietnamPro
-    fontSize: 30.4px
-    fontWeight: '900'
-    lineHeight: '1.25'
-  h2:
-    fontFamily: beVietnamPro
-    fontSize: 35.2px
-    fontWeight: '800'
-    lineHeight: '1.3'
-  h2-mobile:
-    fontFamily: beVietnamPro
-    fontSize: 25.6px
-    fontWeight: '800'
-    lineHeight: '1.3'
-  h3:
-    fontFamily: beVietnamPro
-    fontSize: 18.4px
-    fontWeight: '700'
-    lineHeight: '1.4'
-  body-lg:
-    fontFamily: beVietnamPro
-    fontSize: 17.6px
-    fontWeight: '400'
-    lineHeight: '1.8'
-  body-md:
-    fontFamily: beVietnamPro
-    fontSize: 16px
-    fontWeight: '400'
-    lineHeight: '1.7'
-  body-sm:
-    fontFamily: beVietnamPro
-    fontSize: 14.7px
-    fontWeight: '400'
-    lineHeight: '1.7'
-  label:
-    fontFamily: beVietnamPro
-    fontSize: 13.6px
-    fontWeight: '700'
-    lineHeight: '1'
-  caption:
-    fontFamily: beVietnamPro
-    fontSize: 12.8px
-    fontWeight: '500'
-    lineHeight: '1'
-  stat:
-    fontFamily: beVietnamPro
-    fontSize: 28.8px
-    fontWeight: '900'
-    lineHeight: '1'
-rounded:
-  sm: 0.25rem
-  DEFAULT: 0.5rem
-  md: 0.75rem
-  lg: 1rem
-  xl: 1.5rem
-  full: 9999px
-spacing:
-  xs: 4px
-  sm: 8px
-  md: 16px
-  lg: 24px
-  xl: 32px
-  xxl: 48px
-  section: 80px
----
-
-name: PineAI
-colors:
-  background: '#F6F9F7'
-  surface: '#FFFFFF'
-  border: '#D5E8DE'
-  text: '#1B2B27'
-  text-muted: '#4D6A62'
-  primary: '#1A5C3A'
-  primary-dark: '#134428'
-  primary-light: '#EAF5EE'
-  accent: '#41A870'
-  accent-light: '#D8F3DC'
-  gold: '#C9963B'
-  gold-light: '#FEF3E2'
-  footer-bg: '#12302B'
-  footer-text: '#C5D8D3'
-  footer-muted: '#8AAEA6'
-typography:
-  fontFamily: Vazirmatn
-  h1:
+    fontFamily: Vazirmatn
     fontSize: clamp(1.9rem, 4vw, 2.8rem)
     fontWeight: 900
     lineHeight: 1.25
   h2:
+    fontFamily: Vazirmatn
     fontSize: clamp(1.6rem, 3vw, 2.2rem)
     fontWeight: 800
     lineHeight: 1.3
   h3:
+    fontFamily: Vazirmatn
     fontSize: 1.15rem
     fontWeight: 700
     lineHeight: 1.4
   body-lg:
+    fontFamily: Vazirmatn
     fontSize: 1.1rem
     lineHeight: 1.8
   body-md:
+    fontFamily: Vazirmatn
     fontSize: 1rem
     lineHeight: 1.7
   body-sm:
+    fontFamily: Vazirmatn
     fontSize: 0.92rem
     lineHeight: 1.7
   label:
+    fontFamily: Vazirmatn
     fontSize: 0.85rem
     fontWeight: 700
   caption:
+    fontFamily: Vazirmatn
     fontSize: 0.8rem
     fontWeight: 500
   stat:
+    fontFamily: Vazirmatn
     fontSize: 1.8rem
     fontWeight: 900
     lineHeight: 1
-roundness:
+rounded:
   sm: 6px
   md: 12px
   lg: 20px
@@ -193,3 +71,54 @@ spacing:
   xl: 32px
   xxl: 48px
   section: 80px
+---
+
+# PineAI — Design Specification
+
+## Overview
+PineAI is a smart customer-management platform for Iranian online stores. The visual identity projects trustworthiness and growth through a professional green-based palette, high-contrast Persian typography, and a clean, performance-oriented layout.
+
+### Guiding Principles
+- **Clarity First**: Generous whitespace and high-contrast text ensure instant readability in RTL Persian.
+- **Warm Professionalism**: Earthy greens and gold accents avoid SaaS sterility, projecting premium value.
+- **Performance Driven**: Minimal asset weight, native Persian fonts, and zero-dependency CSS.
+
+---
+
+## Visual Language
+
+### Color Palette
+Rooted in **Forest Green** and **Airy Off-White**, the palette maintains a calm, natural canvas with professional depth.
+
+- **Primary (`#1A5C3A`)**: Used for brand anchors, primary CTAs, and section tags.
+- **Background (`#F6F9F7`)**: Slight green tint for a cohesive, natural page canvas.
+- **Accent Gold (`#C9963B`)**: Reserved for high-value signals and premium badges.
+- **Dark Surface (`#12302B`)**: Deep green for footer and high-contrast sections.
+
+### Typography
+Set in **Vazirmatn**, a variable-weight Persian font optimized for legibility.
+- **Direction**: Global RTL (`direction: rtl`).
+- **Scale**: Fluid headings (`clamp`) ensure responsiveness across mobile and desktop.
+- **Weight**: 900 weight is used for hero numbers and headlines to signal authority.
+
+---
+
+## Component Guidelines
+
+### Navigation & Header
+- **Style**: Sticky, frosted-glass effect (`backdrop-filter: blur(8px)`) with white-96% fill.
+- **Layout**: Logo on the right (RTL), navigation and CTA on the left.
+
+### Interactive Elements
+- **Buttons**:
+  - **Primary**: Solid Forest Green fill, white text.
+  - **Ghost**: Forest Green border/text, Light Green hover fill.
+- **Radii**: `6px` (`sm`) for interactive elements; `20px` (`lg`) for containers.
+
+### Content Containers
+- **Feature Cards**: Off-white fill with subtle border, featuring icon containers in Light Green.
+- **Stats Bar**: Full-width Forest Green band with white numbers and semi-transparent dividers.
+
+### Depth & Elevation
+- **Shadow Sm**: `0 2px 8px rgba(26,92,58,.08)` for headers and rest-state cards.
+- **Shadow Md**: `0 6px 24px rgba(26,92,58,.12)` for hero visuals and hover states.
