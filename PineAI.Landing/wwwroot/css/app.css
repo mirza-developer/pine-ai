@@ -34,6 +34,14 @@
     --radius-sm:        6px;
     --radius-md:        12px;
     --radius-lg:        20px;
+    --radius-pill:      2rem;
+    --space-xs:         4px;
+    --space-sm:         8px;
+    --space-md:         16px;
+    --space-lg:         24px;
+    --space-xl:         32px;
+    --space-xxl:        48px;
+    --space-section:    5rem;
     --container:        1140px;
 }
 
@@ -170,7 +178,7 @@ ul, ol { list-style: none; }
 }
 
 /* ════════════════════ SECTIONS ════════════════════ */
-.section { padding: 5rem 0; }
+.section { padding: var(--space-section) 0; }
 .section-header {
     text-align: center;
     margin-bottom: 3rem;
@@ -180,7 +188,7 @@ ul, ol { list-style: none; }
     background: var(--pine-primary-lt);
     color: var(--pine-primary);
     font-size: .8rem; font-weight: 700;
-    padding: .3rem .85rem; border-radius: 2rem;
+    padding: .3rem .85rem; border-radius: var(--radius-pill);
     letter-spacing: .04em; text-transform: uppercase;
     margin-bottom: .75rem;
 }
@@ -196,7 +204,7 @@ ul, ol { list-style: none; }
 
 /* ════════════════════ HERO ════════════════════ */
 .hero {
-    padding: 5rem 0 4rem;
+    padding: var(--space-section) 0 4rem;
     background: linear-gradient(160deg, var(--pine-primary-lt) 0%, var(--pine-bg) 60%);
 }
 .hero-inner {
@@ -207,7 +215,7 @@ ul, ol { list-style: none; }
     display: inline-flex; align-items: center; gap: .5rem;
     background: var(--pine-gold-lt); color: var(--pine-gold);
     font-size: .85rem; font-weight: 700; padding: .35rem .9rem;
-    border-radius: 2rem; margin-bottom: 1.25rem;
+    border-radius: var(--radius-pill); margin-bottom: 1.25rem;
 }
 .badge-dot {
     width: 7px; height: 7px; border-radius: 50%;
@@ -360,7 +368,7 @@ ul, ol { list-style: none; }
     position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
     background: var(--pine-gold); color: #fff;
     font-size: .75rem; font-weight: 700; padding: .2rem .75rem;
-    border-radius: 2rem; white-space: nowrap;
+    border-radius: var(--radius-pill); white-space: nowrap;
 }
 
 /* ════════════════════ HOW IT WORKS ════════════════════ */
