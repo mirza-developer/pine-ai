@@ -1,20 +1,20 @@
-@page "/"
+﻿@page "/"
 @inject SiteSettings Site
 @inject ContactService ContactSvc
 
 <PageTitle>@Site.Name | پلتفرم هوشمند مدیریت مشتریان برای فروشگاه‌های آنلاین</PageTitle>
 
 <HeadContent>
-    <meta name="description" content="پاین‌ای یک پلتفرم هوشمند مدیریت مشتریان برای فروشگاه‌های آنلاین است. پیامک انبوه، ربات پشتیبانی هوشمند بله با هوش مصنوعی، و سیستم رهگیری سفارش در یک بستر یکپارچه." />
-    <meta name="keywords" content="مدیریت مشتریان, پیامک تبلیغاتی, ربات بله, پشتیبانی هوشمند, رهگیری سفارش, CRM فروشگاه آنلاین, هوش مصنوعی, پاین ای" />
-    <meta property="og:title" content="پاین‌ای | پلتفرم هوشمند مدیریت مشتریان" />
-    <meta property="og:description" content="پیامک هوشمند، پشتیبانی AI با ربات بله و سیستم رهگیری سفارش برای فروشگاه آنلاین شما." />
+    <meta name="description" content="پاین‌ای یک پلتفرم هوشمند مکالمات مشتریان برای فروشگاه‌های آنلاین است. مدیریت تعاملات، ربات پشتیبانی هوشمند بله با هوش مصنوعی، و سیستم رهگیری سفارش در یک بستر یکپارچه." />
+    <meta name="keywords" content="مکالمات مشتریان, پشتیبانی هوشمند, ربات بله, رهگیری سفارش, CRM فروشگاه آنلاین, هوش مصنوعی, پاین ای, چت بات" />
+    <meta property="og:title" content="پاین‌ای | پلتفرم هوشمند مکالمات مشتریان" />
+    <meta property="og:description" content="مدیریت مکالمات، پشتیبانی AI با ربات بله و سیستم رهگیری سفارش برای فروشگاه آنلاین شما." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="@Site.Domain" />
     <meta property="og:locale" content="fa_IR" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="پاین‌ای | PineAI" />
-    <meta name="twitter:description" content="پلتفرم هوشمند مدیریت مشتریان، پیامک و پشتیبانی AI برای فروشگاه‌های آنلاین ایران." />
+    <meta name="twitter:description" content="پلتفرم هوشمند مکالمات مشتریان و پشتیبانی AI برای فروشگاه‌های آنلاین ایران." />
     <link rel="canonical" href="@Site.Domain" />
     <script type="application/ld+json">
     {
@@ -25,7 +25,7 @@
       "url": "@Site.Domain",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "description": "پلتفرم هوشمند مدیریت مشتریان برای فروشگاه‌های آنلاین: پیامک انبوه، ربات پشتیبانی هوشمند بله، و سیستم رهگیری سفارش.",
+      "description": "پلتفرم هوشمند مکالمات مشتریان برای فروشگاه‌های آنلاین: پشتیبانی با ربات بله، و سیستم رهگیری سفارش.",
       "offers": {
         "@@type": "Offer",
         "priceCurrency": "IRR",
@@ -37,7 +37,7 @@
         "url": "@Site.Domain"
       },
       "featureList": [
-        "ارسال پیامک انبوه",
+        "مدیریت تعاملات و مکالمات",
         "ربات پشتیبانی هوشمند بله با هوش مصنوعی",
         "سیستم رهگیری سفارش",
         "مدیریت مشتریان",
@@ -56,11 +56,11 @@
                 ویژه فروشگاه‌های آنلاین
             </div>
             <h1 id="hero-title" class="hero-title">
-                مدیریت هوشمند مشتریان<br />
-                <span class="hero-title-accent">در یک پلتفرم یکپارچه</span>
+                پلتفرم هوشمند مکالمات مشتریان<br />
+                <span class="hero-title-accent">مبتنی بر هوش‌مصنوعی</span>
             </h1>
             <p class="hero-desc">
-                پاین‌ای به فروشگاه‌های آنلاین کمک می‌کند تا با پیامک هوشمند، ربات پشتیبانی AI در بله،
+                پاین‌ای به فروشگاه‌های آنلاین کمک می‌کند تا با مدیریت تعاملات، ربات پشتیبانی AI در بله،
                 و سیستم رهگیری سفارش، تجربه‌ای متمایز برای مشتریان خود بسازند.
             </p>
             <div class="hero-actions">
@@ -102,8 +102,8 @@
         </div>
         <div class="stat-divider" aria-hidden="true"></div>
         <div class="stat-item">
-            <span class="stat-num">۳</span>
-            <span class="stat-label">ابزار در یک پلتفرم</span>
+            <span class="stat-num">۱</span>
+            <span class="stat-label">پلتفرم یکپارچه مکالمات</span>
         </div>
         <div class="stat-divider" aria-hidden="true"></div>
         <div class="stat-item">
@@ -123,28 +123,28 @@
     <div class="container">
         <div class="section-header">
             <span class="section-tag">امکانات</span>
-            <h2 id="features-title">همه‌چیز برای رشد فروشگاه شما</h2>
+            <h2 id="features-title">همه‌چیز برای ارتباط هوشمند</h2>
             <p class="section-desc">
-                سه ابزار قدرتمند که با هم کار می‌کنند تا ارتباط شما با مشتریان را حرفه‌ای کنند.
+                ابزارهای قدرتمند مبتنی بر AI که ارتباط شما با مشتریان را حرفه‌ای و بی‌نقص می‌کنند.
             </p>
         </div>
 
         <div class="features-grid">
-            <article class="feature-card" aria-labelledby="feat-sms">
+            <article class="feature-card" aria-labelledby="feat-conversations">
                 <div class="feature-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                     </svg>
                 </div>
-                <h3 id="feat-sms">پیامک هوشمند</h3>
+                <h3 id="feat-conversations">مدیریت تعاملات و پیام‌ها</h3>
                 <p>
-                    لیست مشتریان خود را وارد کنید و کمپین‌های پیامکی هدفمند ارسال نمایید.
-                    مدیریت کامل مخاطبین، گزارش ارسال و پیگیری نتایج در یک پنل ساده.
+                    تمام تعاملات مشتریان خود را در یک نگاه رصد کنید.
+                    تاریخچه گفتگوها، درخواست‌های پشتیبانی و رهگیری‌ها همگی در پنلی یکپارچه مدیریت می‌شوند.
                 </p>
                 <ul class="feature-list">
-                    <li>ارسال پیامک انبوه به هزاران مشتری</li>
-                    <li>مدیریت لیست مشتریان با ورود اطلاعات دستی یا اکسل</li>
-                    <li>گزارش و تحلیل نتایج کمپین</li>
+                    <li>یکپارچگی با تاریخچه گفتگوها</li>
+                    <li>مدیریت مکالمات مشتریان با دسته‌بندی هوشمند</li>
+                    <li>تحلیل رفتار و نیازهای پر تکرار مشتریان</li>
                 </ul>
             </article>
 
@@ -226,7 +226,7 @@
                 <div class="step-num" aria-hidden="true">۴</div>
                 <div class="step-content">
                     <h3>شروع کار و رشد</h3>
-                    <p>پیامک ارسال کنید، ربات پاسخ‌گو باشد و مشتریان سفارش‌هایشان را پیگیری کنند. همه‌چیز خودکار است.</p>
+                    <p>تعاملات را مدیریت کنید، ربات پاسخ‌گو باشد و مشتریان سفارش‌هایشان را پیگیری کنند. همه‌چیز خودکار است.</p>
                 </div>
             </li>
         </ol>
@@ -294,7 +294,7 @@
             <div class="why-card">
                 <div class="wc-header">پنل مدیریت</div>
                 <div class="wc-stat">
-                    <span class="wc-label">پیامک ارسال‌شده</span>
+                    <span class="wc-label">پاسخ‌های هوش‌مصنوعی</span>
                     <span class="wc-value">۱۲,۴۸۰</span>
                 </div>
                 <div class="wc-stat">
@@ -310,6 +310,186 @@
                     <span class="wc-value">۲۳۱</span>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ PRICING ════════════════════════════════ -->
+<section class="pricing-section section" id="pricing" aria-labelledby="pricing-title">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">تعرفه ها</span>
+            <h2 id="pricing-title">طرح مناسب کسب وکار خود را انتخاب کنید</h2>
+            <p class="section-desc">
+                پلن ها متناسب با حجم کسب و کار شما آماده شده اند
+            </p>
+        </div>
+
+        <div class="pricing-grid">
+
+            <article class="pricing-card" aria-labelledby="plan-shared">
+                <div class="pricing-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.85"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
+                <h3 id="plan-shared" class="pricing-plan-name">پلن اشتراکی</h3>
+                <p class="pricing-plan-desc">
+                    ربات و سرویس های شما روی یک VPS اشتراکی در کنار سایر مشتریان اجرا میشود.
+                    جداسازی کامل داده و حریم خصوصی تضمین شده با هزینه های مقرون به صرفه.
+                </p>
+                <ul class="pricing-features">
+                    <li>فقط بات پشتیبان بله</li>
+                    <li>جداسازی کامل داده و حریم خصوصی</li>
+                    <li>پشتیبانی استاندارد</li>
+                    <li>هزینه پایین تر</li>
+                </ul>
+                <div class="pricing-target">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.85"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    مناسب برای فروشگاههای کوچک و استارتاپها
+                </div>
+                <a href="#contact" class="btn btn-ghost pricing-cta">درخواست مشاوره رایگان</a>
+            </article>
+
+            <article class="pricing-card pricing-card-featured" aria-labelledby="plan-dedicated">
+                <span class="pricing-featured-badge" aria-label="پیشنهادی">پیشنهادی</span>
+                <div class="pricing-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                        <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                        <line x1="6" y1="6" x2="6.01" y2="6"/>
+                        <line x1="6" y1="18" x2="6.01" y2="18"/>
+                    </svg>
+                </div>
+                <h3 id="plan-dedicated" class="pricing-plan-name">پلن اختصاصی</h3>
+                <p class="pricing-plan-desc">
+                    یک VPS کاملا مجزا و اختصاصی برای فروشگاه شما. پشتیبانی بدون تأخیر
+                    بهبود مستمر فرآیندها و سفارشی سازی کامل بر اساس نیازهای خاص شما.
+                </p>
+                <ul class="pricing-features">
+                    <li>تمام امکانات (مکالمات هوشمند، ربات بله، رهگیری)</li>
+                    <li>VPS اختصاصی با منابع کامل و ایزوله</li>
+                    <li>پشتیبانی فوری  و بدون تأخیر</li>
+                    <li>بهبود و سفارشی سازی مستمر فرآیندها</li>
+                    <li>اولویت در توسعه ویژگیهای جدید</li>
+                    <li>امکان اتصال به ERP و CRM</li>
+                </ul>
+                <div class="pricing-target">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    مناسب برای فروشگاههای بزرگ و سازمانها
+                </div>
+                <a href="#contact" class="btn pricing-cta-featured">درخواست مشاوره رایگان</a>
+            </article>
+
+        </div>
+
+        <p class="pricing-note" role="note">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            قیمتها بر اساس حجم سفارشات و نیازهای خاص هر کسبوکار تعیین میشوند. برای دریافت تعرفه اختصاصی فرم تماس را پر کنید.
+        </p>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ FAQ ════════════════════════════════ -->
+<section class="faq-section section" id="faq" aria-labelledby="faq-title">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">سوالات متداول</span>
+            <h2 id="faq-title">پاسخ به سوالات شما</h2>
+            <p class="section-desc">
+                اگر سوالی دارید که اینجا نیست، از طریق فرم تماس با ما در ارتباط باشید.
+            </p>
+        </div>
+
+        <div class="faq-list" role="list">
+
+            <details class="faq-item" role="listitem">
+                <summary class="faq-question">
+                    <span>پاین‌ای چیست و برای چه کسانی مناسب است؟</span>
+                    <span class="faq-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </span>
+                </summary>
+                <div class="faq-answer">
+                    <p>پاین‌ای یک پلتفرم هوشمند مکالمات مشتریان برای فروشگاه‌های آنلاین است. اگر فروشگاه اینترنتی دارید و می‌خواهید با مدیریت تعاملات، ربات پشتیبانی در بله و سیستم رهگیری سفارش، ارتباط حرفه‌ای‌تری با مشتریان‌تان داشته باشید، پاین‌ای دقیقاً برای شماست.</p>
+                </div>
+            </details>
+
+            <details class="faq-item" role="listitem">
+                <summary class="faq-question">
+                    <span>آیا برای راه‌اندازی به دانش فنی نیاز دارم؟</span>
+                    <span class="faq-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </span>
+                </summary>
+                <div class="faq-answer">
+                    <p>نه. راه‌اندازی پاین‌ای بدون هیچ دانش فنی انجام می‌شود. تیم ما در کمتر از ۴۸ ساعت سیستم را با اطلاعات فروشگاه شما پیکربندی می‌کند و آموزش کامل استفاده از پنل را ارائه می‌دهد.</p>
+                </div>
+            </details>
+
+            <details class="faq-item" role="listitem">
+                <summary class="faq-question">
+                    <span>ربات پشتیبانی بله چطور کار می‌کند؟</span>
+                    <span class="faq-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </span>
+                </summary>
+                <div class="faq-answer">
+                    <p>ربات به پیام‌رسان ایرانی بله متصل می‌شود و با استفاده از هوش مصنوعی، به سوالات متداول مشتریان پاسخ می‌دهد، وضعیت سفارش را به‌صورت خودکار از دیتابیس استخراج می‌کند و در صورت نیاز مکالمه را به پشتیبانی انسانی ارجاع می‌دهد. همه این‌ها ۲۴ ساعته و بدون دخالت شما.</p>
+                </div>
+            </details>
+
+            <details class="faq-item" role="listitem">
+                <summary class="faq-question">
+                    <span>آیا می‌توانم لیست مشتریانم را از اکسل وارد کنم؟</span>
+                    <span class="faq-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </span>
+                </summary>
+                <div class="faq-answer">
+                    <p>بله. پنل مدیریت پاین‌ای از وارد کردن مستقیم فایل اکسل (xlsx) و CSV پشتیبانی می‌کند. مشتریان جدید نیز به‌صورت خودکار از طریق سفارش‌ها ثبت می‌شوند و نیازی به ورود دستی ندارد.</p>
+                </div>
+            </details>
+
+            <details class="faq-item" role="listitem">
+                <summary class="faq-question">
+                    <span>سیستم رهگیری سفارش چطور به فروشگاه من متصل می‌شود؟</span>
+                    <span class="faq-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </span>
+                </summary>
+                <div class="faq-answer">
+                    <p>از طریق API یا اتصال مستقیم به دیتابیس (SQL Server یا SQLite) به پلتفرم شما وصل می‌شود. صفحه رهگیری با رنگ، لوگو و دامنه فروشگاه شما سفارشی‌سازی می‌شود تا تجربه‌ای کاملاً برندشده برای مشتریان داشته باشید.</p>
+                </div>
+            </details>
+
+            <details class="faq-item" role="listitem">
+                <summary class="faq-question">
+                    <span>آیا دوره آزمایشی یا دمو رایگان دارید؟</span>
+                    <span class="faq-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </span>
+                </summary>
+                <div class="faq-answer">
+                    <p>بله. یک دمو کاملاً رایگان برای شما آماده می‌کنیم تا قبل از تصمیم‌گیری، همه امکانات را با داده‌های واقعی فروشگاه‌تان تجربه کنید. برای درخواست دمو فرم زیر را پر کنید تا در اسرع وقت با شما تماس بگیریم.</p>
+                </div>
+            </details>
+
         </div>
     </div>
 </section>
