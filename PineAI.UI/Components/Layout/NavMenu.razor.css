@@ -9,7 +9,7 @@
     font-weight: 700;
     letter-spacing: .06em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.35);
+    color: rgba(197, 216, 211, 0.5);
     padding: .9rem 1.1rem .3rem 1.1rem;
 }
 
@@ -23,8 +23,8 @@
     align-items: center;
     gap: .7rem;
     padding: .6rem .85rem;
-    border-radius: .5rem;
-    color: rgba(255,255,255,0.72);
+    border-radius: 8px;
+    color: #C5D8D3;
     text-decoration: none;
     font-size: .88rem;
     transition: background .15s ease, color .15s ease;
@@ -32,15 +32,15 @@
 }
 
 .nav-item ::deep .nav-link:hover {
-    background: rgba(255,255,255,0.1);
+    background: rgba(65, 168, 112, 0.14);
     color: #fff;
 }
 
 .nav-item ::deep a.active {
-    background: rgba(255,255,255,0.18);
+    background: rgba(65, 168, 112, 0.12);
     color: #fff;
     font-weight: 600;
-    border-inline-end: 3px solid #7fffb2;
+    border-inline-end: 3px solid #41A870;
 }
 
 /* ===== Icons ===== */
@@ -54,7 +54,7 @@
 
 .nav-item ::deep a.active .nav-icon {
     opacity: 1;
-    color: #7fffb2;
+    color: #41A870;
 }
 
 /* ===== Nav text ===== */
