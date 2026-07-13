@@ -95,7 +95,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-    font-family: 'Be Vietnam Pro', Vazirmatn, 'Segoe UI', Tahoma, Arial, sans-serif;
+    font-family: Vazirmatn, 'Segoe UI', Tahoma, Arial, sans-serif;
     background: var(--pine-bg);
     color: var(--pine-text);
     direction: rtl;
@@ -183,6 +183,9 @@ ul, ol { list-style: none; }
     display: flex; align-items: center; gap: .6rem;
     text-decoration: none; flex-shrink: 0;
 }
+.logo-icon {
+    display: inline-flex; align-items: center; flex-shrink: 0;
+}
 .logo-text {
     font-size: 1.35rem; font-weight: 800;
     color: var(--pine-primary); letter-spacing: -.01em;
@@ -256,6 +259,9 @@ ul, ol { list-style: none; }
 .hero-inner {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 3rem; align-items: center;
+}
+.hero-content {
+    display: flex; flex-direction: column; justify-content: center;
 }
 .hero-badge {
     display: inline-flex; align-items: center; gap: .5rem;
