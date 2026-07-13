@@ -9,7 +9,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp =>
 {
-    var baseUrl = builder.Configuration["ApiBaseUrl"]!;
+    var baseUrl = builder.Configuration["ApiBaseUrl"];
     var apiKey = builder.Configuration["ApiKey"]!;
     var client = new HttpClient { BaseAddress = new Uri(baseUrl) };
     client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);

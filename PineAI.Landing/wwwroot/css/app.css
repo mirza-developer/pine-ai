@@ -540,3 +540,45 @@ ul, ol { list-style: none; }
     .hero-actions { flex-direction: column; }
     .btn { width: 100%; justify-content: center; }
 }
+
+.customers-section {
+    padding: 2.5rem 0;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color, #edf2f7);
+}
+
+.customers-title {
+    font-size: 0.875rem;
+    color: var(--text-muted, #64748b);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    margin-top: 0;
+}
+
+.customers-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+}
+
+.customer-logo-link {
+    text-decoration: none;
+    color: var(--text-color, #334155);
+    opacity: 0.5;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+    .customer-logo-link:hover {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+
+.customer-logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 1.125rem;
+}
