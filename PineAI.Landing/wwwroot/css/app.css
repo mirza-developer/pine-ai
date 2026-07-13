@@ -436,6 +436,56 @@ ul, ol { list-style: none; }
 .wc-label { font-size: .9rem; color: rgba(255,255,255,.7); }
 .wc-value { font-size: 1.3rem; font-weight: 800; color: #fff; }
 
+/* ════════════════════ CUSTOMERS ════════════════════ */
+.customers-section {
+    background: var(--pine-primary);
+    padding: 3.5rem 0;
+    text-align: center;
+}
+.customers-title {
+    font-size: .82rem; font-weight: 700;
+    color: rgba(255,255,255,.55);
+    text-transform: uppercase; letter-spacing: .08em;
+    margin-bottom: 2rem;
+    display: flex; align-items: center; justify-content: center; gap: .75rem;
+}
+.customers-title::before,
+.customers-title::after {
+    content: '';
+    display: block; flex: 1; max-width: 80px;
+    height: 1px; background: rgba(255,255,255,.18);
+}
+.customers-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+.customer-logo-link {
+    text-decoration: none;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: var(--radius-md);
+    padding: .75rem 1.5rem;
+    color: rgba(255,255,255,.7);
+    transition: background .2s, border-color .2s, color .2s, transform .2s;
+}
+.customer-logo-link:hover {
+    background: rgba(255,255,255,.16);
+    border-color: rgba(255,255,255,.35);
+    color: #fff;
+    transform: translateY(-3px);
+}
+.customer-logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-weight: 700;
+    font-size: 1rem;
+    white-space: nowrap;
+}
+
 /* ════════════════════ CONTACT ════════════════════ */
 .contact-section { background: var(--pine-bg); }
 .contact-form-wrap {
@@ -539,46 +589,4 @@ ul, ol { list-style: none; }
     .contact-form-wrap { padding: 1.5rem; }
     .hero-actions { flex-direction: column; }
     .btn { width: 100%; justify-content: center; }
-}
-
-.customers-section {
-    padding: 2.5rem 0;
-    text-align: center;
-    border-bottom: 1px solid var(--border-color, #edf2f7);
-}
-
-.customers-title {
-    font-size: 0.875rem;
-    color: var(--text-muted, #64748b);
-    margin-bottom: 1.5rem;
-    font-weight: 500;
-    margin-top: 0;
-}
-
-.customers-grid {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 3rem;
-    flex-wrap: wrap;
-}
-
-.customer-logo-link {
-    text-decoration: none;
-    color: var(--text-color, #334155);
-    opacity: 0.5;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-    .customer-logo-link:hover {
-        opacity: 1;
-        transform: translateY(-2px);
-    }
-
-.customer-logo-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 700;
-    font-size: 1.125rem;
 }
