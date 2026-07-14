@@ -1,6 +1,6 @@
 # PineAI (پاین‌ای)
 
-> PineAI is an intelligent, all-in-one customer management platform built exclusively for Iranian online stores. It combines bulk SMS marketing, an AI-powered support chatbot on the Bale messenger, and a branded order-tracking page — all accessible from a single dashboard. The product UI is fully in Persian (Farsi) with RTL layout.
+> PineAI is an intelligent customer conversations platform built exclusively for Iranian online stores. It combines interaction management, an AI-powered support chatbot on the Bale messenger, and a branded order-tracking page — all accessible from a single dashboard. The product UI is fully in Persian (Farsi) with RTL layout.
 
 ## Product
 
@@ -8,7 +8,7 @@
 
 ## Core Features
 
-- [Smart SMS — پیامک هوشمند](https://pineai.ir/#features): Send bulk SMS campaigns to thousands of customers at once. Import contact lists manually or via Excel. Track delivery status and analyze campaign results from the admin panel.
+- [Conversation & Messages Management — مدیریت تعاملات و پیام‌ها](https://pineai.ir/#features): Monitor all customer conversations at a glance. Manage chat histories, support requests, and order tracking inquiries in a unified panel. Features smart categorization and analyzes customer behavior and frequent needs.
 - [AI Support Bot — ربات پشتیبانی هوشمند](https://pineai.ir/#features): A 24/7 automated chatbot running on Bale (Iran's leading messaging platform), powered by a large language model. It queries live order data, answers common customer questions, and escalates complex queries to a human support agent. Supports both text and image messages. This is the most popular feature.
 - [Order Tracking System — سیستم رهگیری سفارش](https://pineai.ir/#features): A white-label, store-branded tracking page for end customers. Customers look up their order status using an order code, mobile number, or email address, and receive the postal tracking code with a one-tap copy action.
 

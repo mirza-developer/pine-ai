@@ -15,7 +15,7 @@ main {
 
 /* ===== Sidebar ===== */
 .sidebar {
-    background: linear-gradient(160deg, #05276b 0%, #0d1f4e 50%, #2d0540 100%);
+    background: #12302B;
     display: flex;
     flex-direction: column;
 }
@@ -36,7 +36,7 @@ main {
     justify-content: space-between;
     padding: 0 1rem;
     height: 4rem;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(197, 216, 211, 0.15);
     flex-shrink: 0;
 }
 
@@ -54,7 +54,7 @@ main {
 
 .brand-icon {
     font-size: 1.6rem;
-    color: #7fffb2;
+    color: #41A870;
 }
 
 .brand-text {
@@ -82,10 +82,10 @@ main {
     justify-content: center;
     width: 2.2rem;
     height: 2.2rem;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: .4rem;
-    color: rgba(255,255,255,0.8);
+    background: rgba(197, 216, 211, 0.1);
+    border: 1px solid rgba(197, 216, 211, 0.2);
+    border-radius: 6px;
+    color: rgba(197, 216, 211, 0.85);
     cursor: pointer;
     font-size: 1.1rem;
     transition: background .15s ease, color .15s ease;
@@ -93,7 +93,7 @@ main {
 }
 
 .toggler-btn:hover {
-    background: rgba(255,255,255,0.18);
+    background: rgba(65, 168, 112, 0.18);
     color: #fff;
 }
 
@@ -119,21 +119,21 @@ main {
 .sidebar-footer {
     margin-top: auto;
     padding: .75rem 1rem;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    border-top: 1px solid rgba(197, 216, 211, 0.15);
 }
 
 .sidebar-user {
     display: flex;
     align-items: center;
     gap: .5rem;
-    color: rgba(255,255,255,0.6);
+    color: rgba(197, 216, 211, 0.75);
     font-size: .8rem;
     margin-bottom: .5rem;
 }
 
 .sidebar-user-icon {
     font-size: 1.1rem;
-    color: rgba(255,255,255,0.45);
+    color: rgba(197, 216, 211, 0.55);
 }
 
 .sidebar-user-name {
@@ -164,13 +164,15 @@ main {
 
 /* ===== Top bar ===== */
 .top-row {
-    background-color: #ffffff;
-    border-bottom: 1px solid #e8e8e8;
+    background-color: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid #D5E8DE;
     height: 3.5rem;
     display: flex;
     align-items: center;
     padding: 0 1rem;
-    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    box-shadow: 0 1px 4px rgba(26, 92, 58, 0.06);
     gap: .5rem;
     flex-shrink: 0;
 }
@@ -240,7 +242,7 @@ main {
     }
 
     .sidebar {
-        width: 240px;
+        width: 260px;
         height: 100vh;
         position: sticky;
         top: 0;
@@ -267,7 +269,7 @@ main {
 
     .top-row, article {
         padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
+        padding-right: 2rem !important;
     }
 }
 

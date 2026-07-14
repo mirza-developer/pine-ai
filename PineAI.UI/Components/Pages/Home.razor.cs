@@ -160,8 +160,8 @@ public partial class Home
                         {
                             label = "تعداد سفارشات",
                             data = data,
-                            borderColor = "rgb(75, 192, 192)",
-                            backgroundColor = "rgba(75, 192, 192, 0.2)",
+                            borderColor = "#41A870",
+                            backgroundColor = "rgba(65, 168, 112, 0.15)",
                             tension = 0.1,
                             fill = true
                         }
