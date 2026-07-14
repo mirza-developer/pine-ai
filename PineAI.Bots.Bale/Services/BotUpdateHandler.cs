@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PineAI.Bots.Bale.Models;
+using PineAI.Bots.Shared.Messages;
 using PineAI.Bots.Shared.Services;
 using PineAI.Bots.Shared.Tools;
 using PineAI.Persistence.Services;
@@ -31,40 +32,8 @@ public class BotUpdateHandler(BaleBotClient botClient,
         ILogger<BotUpdateHandler> logger,
         IConfiguration configuration) : IBotUpdateHandler
 {
-    private const string SupportWaitNotice = "\nلطفاً تا ۷۲ ساعت کاری آینده صبوری کنید. درخواست شما بررسی می‌شود. لطفاً دیگر پیام ندهید، پاسخ‌گویی بر اساس آخرین پیام‌ها انجام می‌شود.";
-
-    private const string PenaltyAppliedMessage =
-        "⛔ به دلیل رفتار نامناسب مکرر، دسترسی شما به مدت ۱۰ دقیقه محدود شد. " +
-        "لطفاً پس از ۱۰ دقیقه مجدداً تلاش کنید.";
-
-    private const string PenaltyLockedMessage =
-        "⛔ دسترسی شما موقتاً محدود است. لطفاً ۱۰ دقیقه صبر کنید.";
-
-    /// <summary>
-    /// Maps each FEEDBACK type to the string fields that must be present, non-empty,
-    /// and not a literal placeholder value (e.g. "{OrderCode}") before the admin
-    /// notification is dispatched. If any required field fails, the handler falls back
-    /// to sending the AI's visible text to the user and skips the admin notification.
-    /// </summary>
-    private static readonly Dictionary<string, string[]> RequiredFeedbackFields = new(StringComparer.Ordinal)
-    {
-        // OrderCode intentionally omitted — instructions say do NOT ask if user didn't mention it
-        ["Satisfaction"]         = ["Description"],
-        ["Complaint"]            = ["OrderCode", "PhoneNumber", "Date", "Description", "FullName"],
-        ["DefectiveProduct"]     = ["OrderCode", "PhoneNumber", "FullName", "Description"],
-        ["PhotoMismatch"]        = ["OrderCode", "PhoneNumber", "FullName", "Description"],
-        ["ReturnedPackage"]      = ["OrderCode", "PhoneNumber", "FullName", "TrackingCode"],
-        ["Wholesale"]            = ["PhoneNumber", "FullName", "Description"],
-        ["NoOrderCode"]          = ["FullName", "PhoneNumber", "OrderAmount", "PaymentDate"],
-        ["FailedPayment"]        = ["PhoneNumber", "FullName", "OrderAmount", "PaymentDate", "Description"],
-        ["DelayedDelivery"]      = ["OrderCode", "PhoneNumber", "FullName"],
-        ["WrongSize"]            = ["OrderCode", "PhoneNumber", "FullName", "Description"],
-        // FullName omitted — user may be anonymous; Description is the minimum useful signal
-        ["UnknownQuery"]         = ["Description"],
-        ["InStoreBillingError"]  = ["PhoneNumber", "FullName", "BranchName", "Description"],
-        ["InStoreComplaint"]     = ["PhoneNumber", "FullName", "BranchName", "Description"],
-        ["StoreHoursQuery"]      = ["Description"],
-    };
+    /// <summary>Platform name used in user-facing support messages.</summary>
+    private const string PlatformName = "بله";
 
     private readonly List<long> chatIds = new()
     {
@@ -169,7 +138,7 @@ public class BotUpdateHandler(BaleBotClient botClient,
         if (penaltyStore.IsUnderPenalty(chatId))
         {
             logger.LogInformation("Chat {ChatId} is under penalty — message suppressed", chatId);
-            await botClient.SendMessageAsync(chatId, PenaltyLockedMessage, ct);
+            await botClient.SendMessageAsync(chatId, BotSharedMessages.PenaltyLocked, ct);
             return;
         }
 
@@ -193,7 +162,7 @@ public class BotUpdateHandler(BaleBotClient botClient,
             sessionStore.RemoveSession(chatId);
             penaltyStore.ApplyPenalty(chatId);
             logger.LogWarning("Penalty applied to chat {ChatId}. Reason: {Reason}", chatId, penaltyText);
-            await SendAndEnqueueBotReplyAsync(chatId, username, PenaltyAppliedMessage, ct);
+            await SendAndEnqueueBotReplyAsync(chatId, username, BotSharedMessages.PenaltyApplied, ct);
             return;
         }
 
@@ -212,7 +181,7 @@ public class BotUpdateHandler(BaleBotClient botClient,
         // is never told their data was delivered when, in fact, no admin dispatch occurred
         // (malformed JSON, missing required fields, missing TargetChatId, …).
         visibleOrderCodes = ResponseBlockTools.StripVerificationBlocks(visibleOrderCodes, out var aiVerificationText);
-        ValidateAiVerificationText(aiVerificationText);
+        FeedbackValidator.ValidateAiVerificationText(aiVerificationText, logger);
 
         // If the AI signalled one or more order codes, resolve them from the DB
         if (orderCodes.Count > 0)
@@ -327,7 +296,7 @@ public class BotUpdateHandler(BaleBotClient botClient,
 
             var feedbackType = typeProp.GetString() ?? string.Empty;
 
-            if (!ValidateFeedbackJson(feedbackType, root))
+            if (!FeedbackValidator.ValidateFeedbackJson(feedbackType, root, logger))
             {
                 // ValidateFeedbackJson already logged per-field warnings.
                 // Send the AI's visible text — it should contain the question asking for the missing field.
@@ -368,7 +337,7 @@ public class BotUpdateHandler(BaleBotClient botClient,
         if (targetChatId == 0)
         {
             logger.LogWarning("Chat ID not configured for feedback type: {FeedbackType}", feedbackType);
-            const string unconfiguredMsg = "✅ اطلاعات شما ثبت شد. پشتیبانی ما در بله در اسرع وقت به شما پیام می‌دهد." + SupportWaitNotice;
+            var unconfiguredMsg = BotSharedMessages.SupportAcknowledgement(PlatformName);
             await botClient.SendMessageAsync(userChatId, unconfiguredMsg, ct);
             chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, unconfiguredMsg, IsFromBot: true, DateTime.UtcNow));
             return;
@@ -443,534 +412,141 @@ public class BotUpdateHandler(BaleBotClient botClient,
 
     private async Task HandleSatisfactionAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageSatisfactionSuccess = """
-            مبارکتون باشه. خوشحالیم تونستیم پاسخ اعتمادتون رو بدیم. به امید دیدار مجدد در خرید های بعدی
-            """;
-
-        await botClient.SendMessageAsync(userChatId, messageSatisfactionSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageSatisfactionSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        string orderCode = root.TryGetProperty("OrderCode", out var ocProp) ? ocProp.GetString() : "نامشخص";
-        string description = root.TryGetProperty("Description", out var descProp) ? descProp.GetString() : "";
-
-        string satisfactionLog = $"🌸 پیام رضایت جدید ثبت شد:\n" +
-            $"کد سفارش: {orderCode}\n" +
-            $"توضیحات: {description}" +
-            userBaleUsername;
-
-        await botClient.SendMessageAsync(targetChatId, satisfactionLog, CancellationToken.None);
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.SatisfactionSuccess, ct);
+        var log = FeedbackLogBuilder.BuildSatisfactionLog(root, userBaleUsername);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
     }
 
     private async Task HandleComplaintAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageComplaintSuccess = "📣 اطلاعات شما ثبت شد:\nپشتیبانی ما در بله در اسرع وقت به شما پیام می‌دهد." + SupportWaitNotice;
-        await botClient.SendMessageAsync(userChatId, messageComplaintSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageComplaintSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        var orderCode    = root.TryGetProperty("OrderCode",    out var ocProp)   ? ocProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var phoneNumber  = root.TryGetProperty("PhoneNumber",  out var phProp)   ? phProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var date         = root.TryGetProperty("Date",         out var dtProp)   ? dtProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var description  = root.TryGetProperty("Description",  out var dscProp)  ? dscProp.GetString()  ?? "نامشخص" : "نامشخص";
-
-        string complaintLog = $"📣 شکایت/درخواست پیگیری جدید ثبت شد:\n" +
-            $"کد سفارش: {orderCode}\n" +
-            $"شماره تماس: {phoneNumber}\n" +
-            $"تاریخ: {date}\n" +
-            $"توضیحات: {description}\n";
-
-        var order = await dbContext.CustomerOrder
-               .Include(o => o.OrderStatus)
-               .FirstOrDefaultAsync(o => o.OrderCode == orderCode, CancellationToken.None);
-
-        if (order is not null)
-        {
-            complaintLog += "\n" +
-                $"📦 سفارش «{order.OrderCode}»:\n" +
-                $"وضعیت: {order.OrderStatus.Title}\n" +
-                $"آخرین به‌روزرسانی: {PersianCalendarTools.GregorianToPersian(order.UpdatedAt)} {order.UpdatedAt:HH:mm}";
-        }
-        else
-        {
-            complaintLog += "\n" + $"❌ سفارشی با کد «{orderCode}» یافت نشد.";
-        }
-
-        complaintLog += userBaleUsername + "\n #case ";
-
-        await botClient.SendMessageAsync(targetChatId, complaintLog, CancellationToken.None);
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.ComplaintSuccess(PlatformName), ct);
+        var orderCode = root.TryGetProperty("OrderCode", out var ocProp) ? ocProp.GetString() : null;
+        var orderInfo = await FeedbackLogBuilder.LookupComplaintOrderAsync(orderCode, dbContext);
+        var log = FeedbackLogBuilder.BuildComplaintLog(root, userBaleUsername, orderInfo);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
     }
 
     private async Task HandleDefectiveProductAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageSuccess = "✅ اطلاعات شما ثبت شد. پشتیبانی ما در بله در اسرع وقت به شما پیام می‌دهد." + SupportWaitNotice;
-        await botClient.SendMessageAsync(userChatId, messageSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        var orderCode    = root.TryGetProperty("OrderCode",    out var ocProp)   ? ocProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var phoneNumber  = root.TryGetProperty("PhoneNumber",  out var phProp)   ? phProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var fullName     = root.TryGetProperty("FullName",     out var fnProp)   ? fnProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var description  = root.TryGetProperty("Description",  out var dscProp)  ? dscProp.GetString()  ?? "نامشخص" : "نامشخص";
-        bool hasPhoto    = GetHasPhoto(root);
-
-        string defectiveLog = $"⚠️ گزارش محصول معیوب/خراب:\n" +
-            $"کد سفارش: {orderCode}\n" +
-            $"نام و نام خانوادگی: {fullName}\n" +
-            $"شماره تماس: {phoneNumber}\n" +
-            $"توضیحات: {description}\n" +
-            $"عکس ارسال شده: {(hasPhoto ? "بله" : "خیر")}\n";
-
-        var order = await LookupOrderAsync(orderCode, ct);
-        defectiveLog += order + userBaleUsername + "\n #defective";
-
-        await botClient.SendMessageAsync(targetChatId, defectiveLog, CancellationToken.None);
-
-        // Forward the user's photo(s) to the support chat when the AI confirmed one was received
-        if (hasPhoto)
-        {
-            var storedMessageIds = photoMessageStore.TakePhotos(userChatId);
-            if (storedMessageIds.Count > 0)
-            {
-                foreach (var msgId in storedMessageIds)
-                    await botClient.ForwardMessageAsync(targetChatId, userChatId, msgId, CancellationToken.None);
-            }
-            else
-            {
-                logger.LogWarning("HasPhoto=true for DefectiveProduct but no stored photo found for chat {ChatId}", userChatId);
-            }
-        }
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.SupportAcknowledgement(PlatformName), ct);
+        bool hasPhoto = FeedbackValidator.GetHasPhoto(root);
+        var orderCode = root.TryGetProperty("OrderCode", out var ocProp) ? ocProp.GetString() : null;
+        var orderInfo = await FeedbackLogBuilder.LookupOrderAsync(orderCode, dbContext);
+        var log = FeedbackLogBuilder.BuildDefectiveProductLog(root, userBaleUsername, hasPhoto, orderInfo);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
+        await ForwardStoredPhotosAsync(userChatId, targetChatId, hasPhoto, "DefectiveProduct", ct);
     }
 
     private async Task HandlePhotoMismatchAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageSuccess = "✅ اطلاعات شما ثبت شد. پشتیبانی ما در بله در اسرع وقت به شما پیام می‌دهد." + SupportWaitNotice;
-        await botClient.SendMessageAsync(userChatId, messageSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        var orderCode    = root.TryGetProperty("OrderCode",    out var ocProp)   ? ocProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var phoneNumber  = root.TryGetProperty("PhoneNumber",  out var phProp)   ? phProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var fullName     = root.TryGetProperty("FullName",     out var fnProp)   ? fnProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var description  = root.TryGetProperty("Description",  out var dscProp)  ? dscProp.GetString()  ?? "نامشخص" : "نامشخص";
-        bool hasPhoto    = GetHasPhoto(root);
-
-        string mismatchLog = $"📸 گزارش مغایرت عکس و محصول:\n" +
-            $"کد سفارش: {orderCode}\n" +
-            $"نام و نام خانوادگی: {fullName}\n" +
-            $"شماره تماس: {phoneNumber}\n" +
-            $"توضیحات: {description}\n" +
-            $"عکس ارسال شده: {(hasPhoto ? "بله" : "خیر")}\n";
-
-        var order = await LookupOrderAsync(orderCode, ct);
-        mismatchLog += order + userBaleUsername + "\n #mismatch";
-
-        await botClient.SendMessageAsync(targetChatId, mismatchLog, CancellationToken.None);
-
-        // Forward the user's photo(s) to the support chat when the AI confirmed one was received
-        if (hasPhoto)
-        {
-            var storedMessageIds = photoMessageStore.TakePhotos(userChatId);
-            if (storedMessageIds.Count > 0)
-            {
-                foreach (var msgId in storedMessageIds)
-                    await botClient.ForwardMessageAsync(targetChatId, userChatId, msgId, CancellationToken.None);
-            }
-            else
-            {
-                logger.LogWarning("HasPhoto=true for PhotoMismatch but no stored photo found for chat {ChatId}", userChatId);
-            }
-        }
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.SupportAcknowledgement(PlatformName), ct);
+        bool hasPhoto = FeedbackValidator.GetHasPhoto(root);
+        var orderCode = root.TryGetProperty("OrderCode", out var ocProp) ? ocProp.GetString() : null;
+        var orderInfo = await FeedbackLogBuilder.LookupOrderAsync(orderCode, dbContext);
+        var log = FeedbackLogBuilder.BuildPhotoMismatchLog(root, userBaleUsername, hasPhoto, orderInfo);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
+        await ForwardStoredPhotosAsync(userChatId, targetChatId, hasPhoto, "PhotoMismatch", ct);
     }
 
     private async Task HandleReturnedPackageAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageSuccess = "✅ اطلاعات شما ثبت شد. پشتیبانی ما در بله در اسرع وقت به شما پیام می‌دهد." + SupportWaitNotice;
-        await botClient.SendMessageAsync(userChatId, messageSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        var orderCode    = root.TryGetProperty("OrderCode",    out var ocProp)   ? ocProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var phoneNumber  = root.TryGetProperty("PhoneNumber",  out var phProp)   ? phProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var fullName     = root.TryGetProperty("FullName",     out var fnProp)   ? fnProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var trackingCode = root.TryGetProperty("TrackingCode", out var tcProp)   ? tcProp.GetString()   ?? "نامشخص" : "نامشخص";
-
-        string returnedLog = $"📦 گزارش بسته برگشت خورده:\n" +
-            $"کد سفارش: {orderCode}\n" +
-            $"نام و نام خانوادگی: {fullName}\n" +
-            $"شماره تماس: {phoneNumber}\n" +
-            $"کد رهگیری پست: {trackingCode}\n";
-
-        var order = await LookupOrderAsync(orderCode, ct);
-        returnedLog += order + userBaleUsername + "\n #returned";
-
-        await botClient.SendMessageAsync(targetChatId, returnedLog, CancellationToken.None);
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.SupportAcknowledgement(PlatformName), ct);
+        var orderCode = root.TryGetProperty("OrderCode", out var ocProp) ? ocProp.GetString() : null;
+        var orderInfo = await FeedbackLogBuilder.LookupOrderAsync(orderCode, dbContext);
+        var log = FeedbackLogBuilder.BuildReturnedPackageLog(root, userBaleUsername, orderInfo);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
     }
 
     private async Task HandleWholesaleAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageSuccess = "✅ درخواست عمده شما ثبت شد. پشتیبانی ما در بله در اسرع وقت به شما پیام می‌دهد." + SupportWaitNotice;
-        await botClient.SendMessageAsync(userChatId, messageSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        var phoneNumber  = root.TryGetProperty("PhoneNumber",  out var phProp)   ? phProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var fullName     = root.TryGetProperty("FullName",     out var fnProp)   ? fnProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var description  = root.TryGetProperty("Description",  out var dscProp)  ? dscProp.GetString()  ?? "نامشخص" : "نامشخص";
-
-        string wholesaleLog = $"📦 درخواست سفارش عمده جدید:\n" +
-            $"نام و نام خانوادگی: {fullName}\n" +
-            $"شماره تماس: {phoneNumber}\n" +
-            $"توضیحات: {description}" +
-            userBaleUsername + "\n #wholesale";
-
-        await botClient.SendMessageAsync(targetChatId, wholesaleLog, CancellationToken.None);
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.WholesaleSuccess(PlatformName), ct);
+        var log = FeedbackLogBuilder.BuildWholesaleLog(root, userBaleUsername);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
     }
 
     private async Task HandleNoOrderCodeAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageSuccess = "✅ اطلاعات شما ثبت شد. پشتیبانی ما پس از بررسی در بله به شما پیام می‌دهد." + SupportWaitNotice;
-        await botClient.SendMessageAsync(userChatId, messageSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        var fullName     = root.TryGetProperty("FullName",     out var fnProp)   ? fnProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var phoneNumber  = root.TryGetProperty("PhoneNumber",  out var phProp)   ? phProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var orderAmount  = root.TryGetProperty("OrderAmount",  out var oaProp)   ? oaProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var paymentDate  = root.TryGetProperty("PaymentDate",  out var pdProp)   ? pdProp.GetString()   ?? "نامشخص" : "نامشخص";
-
-        string noCodeLog = $"🔍 درخواست یافتن کد سفارش:\n" +
-            $"نام و نام خانوادگی: {fullName}\n" +
-            $"شماره تماس: {phoneNumber}\n" +
-            $"مبلغ سفارش: {orderAmount}\n" +
-            $"تاریخ پرداخت: {paymentDate}" +
-            userBaleUsername + "\n #nocode";
-
-        await botClient.SendMessageAsync(targetChatId, noCodeLog, CancellationToken.None);
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.ReviewSuccess(PlatformName), ct);
+        var log = FeedbackLogBuilder.BuildNoOrderCodeLog(root, userBaleUsername);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
     }
 
     private async Task HandleFailedPaymentAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageSuccess = "✅ اطلاعات شما ثبت شد. پشتیبانی ما پس از بررسی در بله به شما پیام می‌دهد." + SupportWaitNotice;
-        await botClient.SendMessageAsync(userChatId, messageSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        var phoneNumber  = root.TryGetProperty("PhoneNumber",  out var phProp)   ? phProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var fullName     = root.TryGetProperty("FullName",     out var fnProp)   ? fnProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var orderAmount  = root.TryGetProperty("OrderAmount",  out var oaProp)   ? oaProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var paymentDate  = root.TryGetProperty("PaymentDate",  out var pdProp)   ? pdProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var description  = root.TryGetProperty("Description",  out var dscProp)  ? dscProp.GetString()  ?? "نامشخص" : "نامشخص";
-
-        string failedPaymentLog = $"💳 گزارش پرداخت ناموفق:\n" +
-            $"نام و نام خانوادگی: {fullName}\n" +
-            $"شماره تماس: {phoneNumber}\n" +
-            $"مبلغ: {orderAmount}\n" +
-            $"تاریخ پرداخت: {paymentDate}\n" +
-            $"توضیحات: {description}" +
-            userBaleUsername + "\n #failedpayment";
-
-        await botClient.SendMessageAsync(targetChatId, failedPaymentLog, CancellationToken.None);
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.ReviewSuccess(PlatformName), ct);
+        var log = FeedbackLogBuilder.BuildFailedPaymentLog(root, userBaleUsername);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
     }
 
     private async Task HandleDelayedDeliveryAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageSuccess = "✅ اطلاعات شما ثبت شد. پشتیبانی ما پس از پیگیری در بله به شما پیام می‌دهد." + SupportWaitNotice;
-        await botClient.SendMessageAsync(userChatId, messageSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        var orderCode    = root.TryGetProperty("OrderCode",    out var ocProp)   ? ocProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var phoneNumber  = root.TryGetProperty("PhoneNumber",  out var phProp)   ? phProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var fullName     = root.TryGetProperty("FullName",     out var fnProp)   ? fnProp.GetString()   ?? "نامشخص" : "نامشخص";
-
-        string delayedLog = $"⏰ گزارش تاخیر در تحویل (بالای ۸ روز کاری):\n" +
-            $"کد سفارش: {orderCode}\n" +
-            $"نام و نام خانوادگی: {fullName}\n" +
-            $"شماره تماس: {phoneNumber}\n";
-
-        var order = await LookupOrderAsync(orderCode, ct);
-        delayedLog += order + userBaleUsername + "\n #delayed";
-
-        await botClient.SendMessageAsync(targetChatId, delayedLog, CancellationToken.None);
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.FollowUpSuccess(PlatformName), ct);
+        var orderCode = root.TryGetProperty("OrderCode", out var ocProp) ? ocProp.GetString() : null;
+        var orderInfo = await FeedbackLogBuilder.LookupOrderAsync(orderCode, dbContext);
+        var log = FeedbackLogBuilder.BuildDelayedDeliveryLog(root, userBaleUsername, orderInfo);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
     }
 
     private async Task HandleWrongSizeAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageSuccess = "✅ اطلاعات شما ثبت شد. پشتیبانی ما در بله در اسرع وقت به شما پیام می‌دهد." + SupportWaitNotice;
-        await botClient.SendMessageAsync(userChatId, messageSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        var orderCode    = root.TryGetProperty("OrderCode",    out var ocProp)   ? ocProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var phoneNumber  = root.TryGetProperty("PhoneNumber",  out var phProp)   ? phProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var fullName     = root.TryGetProperty("FullName",     out var fnProp)   ? fnProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var description  = root.TryGetProperty("Description",  out var dscProp)  ? dscProp.GetString()  ?? "نامشخص" : "نامشخص";
-
-        string wrongSizeLog = $"📏 گزارش سایز نامناسب:\n" +
-            $"کد سفارش: {orderCode}\n" +
-            $"نام و نام خانوادگی: {fullName}\n" +
-            $"شماره تماس: {phoneNumber}\n" +
-            $"توضیحات: {description}\n";
-
-        var order = await LookupOrderAsync(orderCode, ct);
-        wrongSizeLog += order + userBaleUsername + "\n #wrongsize";
-
-        await botClient.SendMessageAsync(targetChatId, wrongSizeLog, CancellationToken.None);
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.SupportAcknowledgement(PlatformName), ct);
+        var orderCode = root.TryGetProperty("OrderCode", out var ocProp) ? ocProp.GetString() : null;
+        var orderInfo = await FeedbackLogBuilder.LookupOrderAsync(orderCode, dbContext);
+        var log = FeedbackLogBuilder.BuildWrongSizeLog(root, userBaleUsername, orderInfo);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
     }
 
     private async Task HandleUnknownQueryAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageSuccess = "✅ پیام شما ثبت شد. پشتیبانی ما در بله در اسرع وقت به شما پیام می‌دهد." + SupportWaitNotice;
-        await botClient.SendMessageAsync(userChatId, messageSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        var fullName = root.TryGetProperty("FullName", out var fnProp) ? fnProp.GetString() : "نامشخص";
-        var description = root.TryGetProperty("Description", out var descProp) ? descProp.GetString() : "";
-
-        string unknownLog = $"❓ درخواست نامشخص:\n" +
-            $"نام و نام خانوادگی: {fullName}\n" +
-            $"توضیحات: {description}" +
-            userBaleUsername + "\n #unknown";
-
-        await botClient.SendMessageAsync(targetChatId, unknownLog, CancellationToken.None);
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.MessageReceivedSuccess(PlatformName), ct);
+        var log = FeedbackLogBuilder.BuildUnknownQueryLog(root, userBaleUsername);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
     }
 
     private async Task HandleInStoreBillingErrorAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageSuccess = "✅ اطلاعات شما ثبت شد. پشتیبانی ما در بله در اسرع وقت به شما پیام می‌دهد." + SupportWaitNotice;
-        await botClient.SendMessageAsync(userChatId, messageSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        var phoneNumber  = root.TryGetProperty("PhoneNumber",  out var phProp)   ? phProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var fullName     = root.TryGetProperty("FullName",     out var fnProp)   ? fnProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var branchName   = root.TryGetProperty("BranchName",   out var bnProp)   ? bnProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var description  = root.TryGetProperty("Description",  out var dscProp)  ? dscProp.GetString()  ?? "نامشخص" : "نامشخص";
-        bool hasPhoto    = GetHasPhoto(root);
-
-        string logText = $"🧾 گزارش خطای فاکتور خرید حضوری:\n" +
-            $"نام و نام خانوادگی: {fullName}\n" +
-            $"شماره تماس: {phoneNumber}\n" +
-            $"شعبه: {branchName}\n" +
-            $"توضیحات: {description}\n" +
-            $"عکس ارسال شده: {(hasPhoto ? "بله" : "خیر")}" +
-            userBaleUsername + "\n #instorebillingerror";
-
-        await botClient.SendMessageAsync(targetChatId, logText, CancellationToken.None);
-
-        if (hasPhoto)
-        {
-            var storedMessageIds = photoMessageStore.TakePhotos(userChatId);
-            if (storedMessageIds.Count > 0)
-            {
-                foreach (var msgId in storedMessageIds)
-                    await botClient.ForwardMessageAsync(targetChatId, userChatId, msgId, CancellationToken.None);
-            }
-            else
-            {
-                logger.LogWarning("HasPhoto=true for InStoreBillingError but no stored photo found for chat {ChatId}", userChatId);
-            }
-        }
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.SupportAcknowledgement(PlatformName), ct);
+        bool hasPhoto = FeedbackValidator.GetHasPhoto(root);
+        var log = FeedbackLogBuilder.BuildInStoreBillingErrorLog(root, userBaleUsername, hasPhoto);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
+        await ForwardStoredPhotosAsync(userChatId, targetChatId, hasPhoto, "InStoreBillingError", ct);
     }
 
     private async Task HandleInStoreComplaintAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageSuccess = "✅ پیام شما به پشتیبان‌های ما ارسال شد و تا ۷۲ ساعت کاری پشتیبان به شما پاسخ میده." + SupportWaitNotice;
-        await botClient.SendMessageAsync(userChatId, messageSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        var phoneNumber  = root.TryGetProperty("PhoneNumber",  out var phProp)   ? phProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var fullName     = root.TryGetProperty("FullName",     out var fnProp)   ? fnProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var branchName   = root.TryGetProperty("BranchName",   out var bnProp)   ? bnProp.GetString()   ?? "نامشخص" : "نامشخص";
-        var description  = root.TryGetProperty("Description",  out var dscProp)  ? dscProp.GetString()  ?? "نامشخص" : "نامشخص";
-
-        string logText = $"🏬 گزارش شکایت از رفتار پرسنل خرید حضوری:\n" +
-            $"نام و نام خانوادگی: {fullName}\n" +
-            $"شماره تماس: {phoneNumber}\n" +
-            $"شعبه: {branchName}\n" +
-            $"توضیحات: {description}" +
-            userBaleUsername + "\n #instorecomplaint";
-
-        await botClient.SendMessageAsync(targetChatId, logText, CancellationToken.None);
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.InStoreComplaintSuccess, ct);
+        var log = FeedbackLogBuilder.BuildInStoreComplaintLog(root, userBaleUsername);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
     }
 
     private async Task HandleStoreHoursQueryAsync(long userChatId, long targetChatId, JsonElement root, string userBaleUsername, string username, CancellationToken ct)
     {
-        string messageSuccess = "✅ پیام شما به پشتیبان‌های ما ارسال شد و به زودی ساعت کاری اون تاریخ رو بهتون اطلاع می‌دیم.";
-        await botClient.SendMessageAsync(userChatId, messageSuccess, ct);
-        chatMessageQueue.TryEnqueue(new BotChatMessageEntry(username, userChatId, messageSuccess, IsFromBot: true, DateTime.UtcNow));
-
-        var fullName = root.TryGetProperty("FullName", out var fnProp) ? fnProp.GetString() : "نامشخص";
-        var description = root.TryGetProperty("Description", out var descProp) ? descProp.GetString() : "";
-
-        string logText = $"🕒 درخواست پرسش ساعت کاری تعطیلات:\n" +
-            $"نام و نام خانوادگی: {fullName}\n" +
-            $"توضیحات: {description}" +
-            userBaleUsername + "\n #storehoursquery";
-
-        await botClient.SendMessageAsync(targetChatId, logText, CancellationToken.None);
+        await SendAndEnqueueBotReplyAsync(userChatId, username, BotSharedMessages.StoreHoursQuerySuccess, ct);
+        var log = FeedbackLogBuilder.BuildStoreHoursQueryLog(root, userBaleUsername);
+        await botClient.SendMessageAsync(targetChatId, log, CancellationToken.None);
     }
 
-    private async Task<string> LookupOrderAsync(string? orderCode, CancellationToken ct)
+    /// <summary>
+    /// Forwards stored photos for a user to the target admin chat when the AI indicated
+    /// a photo was received.  Logs a warning when no photo is found in the store.
+    /// </summary>
+    private async Task ForwardStoredPhotosAsync(
+        long userChatId, long targetChatId, bool hasPhoto, string feedbackType, CancellationToken ct)
     {
-        if (string.IsNullOrEmpty(orderCode))
-            return "";
+        if (!hasPhoto)
+            return;
 
-        orderCode = ResponseBlockTools.NormalizeDigits(orderCode);
-
-        var order = await dbContext.CustomerOrder
-            .Include(o => o.OrderStatus)
-            .FirstOrDefaultAsync(o => o.OrderCode == orderCode, CancellationToken.None);
-
-        if (order is not null)
+        var storedMessageIds = photoMessageStore.TakePhotos(userChatId);
+        if (storedMessageIds.Count > 0)
         {
-            return "\n" +
-                 $"📦 سفارش «{order.OrderCode}»:\n" +
-                        $"وضعیت: {order.OrderStatus.Title}\n" +
-                        (!string.IsNullOrEmpty(order.PostalTrackingCode) ? $"کد مرسوله پستی: {order.PostalTrackingCode}\n" : "") +
-                        $" کد ۲۴ رقمیو بزن تو سایت پست https://tracking.post.ir/ از وضعیت بسته باخبر شو";
+            foreach (var msgId in storedMessageIds)
+                await botClient.ForwardMessageAsync(targetChatId, userChatId, msgId, CancellationToken.None);
         }
         else
         {
-            return "\n" + $"❌ سفارشی با کد «{orderCode}» یافت نشد.";
+            logger.LogWarning(
+                "HasPhoto=true for {FeedbackType} but no stored photo found for chat {ChatId}",
+                feedbackType, userChatId);
         }
-    }
-
-    /// <summary>
-    /// Returns <c>true</c> when a field must be considered missing, meaning the admin
-    /// notification must NOT be dispatched. A field is missing when it is:
-    /// <list type="bullet">
-    ///   <item>absent from the JSON object,</item>
-    ///   <item>null, empty, or whitespace, or</item>
-    ///   <item>still a literal template placeholder such as <c>{OrderCode}</c> — the AI
-    ///         copied the template without substituting a real value.</item>
-    /// </list>
-    /// </summary>
-    private static bool IsFieldMissing(JsonElement root, string fieldName)
-    {
-        if (!root.TryGetProperty(fieldName, out var element))
-            return true;
-
-        if (element.ValueKind == JsonValueKind.Null)
-            return true;
-
-        var value = element.ValueKind == JsonValueKind.String ? element.GetString() : element.ToString();
-
-        if (string.IsNullOrWhiteSpace(value))
-            return true;
-
-        // Detect unresolved template placeholders: {AnyWord}
-        var trimmed = value.Trim();
-        if (trimmed.Length >= 3 && trimmed[0] == '{' && trimmed[^1] == '}')
-        {
-            var inner = trimmed[1..^1];
-            if (inner.Length > 0 && inner.All(char.IsLetter))
-                return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Returns <c>true</c> when all required fields for <paramref name="feedbackType"/>
-    /// are present and valid. Logs a warning for each missing field.
-    /// Returns <c>true</c> (allow) when the type is unknown to avoid blocking new types
-    /// that haven't been added to <see cref="RequiredFeedbackFields"/> yet.
-    /// </summary>
-    private bool ValidateFeedbackJson(string feedbackType, JsonElement root)
-    {
-        if (!RequiredFeedbackFields.TryGetValue(feedbackType, out var requiredFields))
-        {
-            logger.LogWarning("Feedback type '{FeedbackType}' has no required-field definition — dispatching without validation", feedbackType);
-            return true;
-        }
-
-        var valid = true;
-        foreach (var field in requiredFields)
-        {
-            if (IsFieldMissing(root, field))
-            {
-                logger.LogWarning(
-                    "Feedback type '{FeedbackType}' blocked: required field '{Field}' is missing or is still a placeholder",
-                    feedbackType, field);
-                valid = false;
-            }
-        }
-
-        return valid;
-    }
-
-    /// <summary>
-    /// Reads a boolean <c>HasPhoto</c> field from the JSON, handling all three cases
-    /// the AI may produce: JSON <c>true</c>/<c>false</c> literals, or the strings
-    /// <c>"true"</c>/<c>"false"</c>.
-    /// </summary>
-    private static bool GetHasPhoto(JsonElement root)
-    {
-        if (!root.TryGetProperty("HasPhoto", out var el))
-            return false;
-
-        return el.ValueKind switch
-        {
-            JsonValueKind.True  => true,
-            JsonValueKind.False => false,
-            JsonValueKind.String => bool.TryParse(el.GetString(), out var b) && b,
-            _ => false
-        };
-    }
-
-    /// <summary>
-    /// Arabic-only characters that must NEVER appear in a <c>&lt;&lt;VERIFICATION&gt;&gt;</c>
-    /// block emitted by the AI. The instruction file mandates that verification text be
-    /// written in Persian script only — using <c>ی</c>/<c>ک</c>/<c>ه</c> instead of the
-    /// Arabic <c>ي</c>/<c>ك</c>/<c>ة</c>, with no Arabic alif variants or harakat. This
-    /// keeps the user-visible support replies consistent with the rest of the bot's UI
-    /// (which uses Persian script) and surfaces AI drift early via a single log line.
-    /// </summary>
-    private static readonly char[] ArabicOnlyCharacters =
-    {
-        '\u064A', // ARABIC LETTER YEH        ي  (Persian uses ی U+06CC)
-        '\u0643', // ARABIC LETTER KAF        ك  (Persian uses ک U+06A9)
-        '\u0629', // ARABIC LETTER TEH MARBUTA ة (Persian uses ه U+0647)
-        '\u0649', // ARABIC LETTER ALEF MAKSURA ى
-        '\u0622', // ARABIC LETTER ALEF WITH MADDA ABOVE آ
-        '\u0623', // ARABIC LETTER ALEF WITH HAMZA ABOVE أ
-        '\u0625', // ARABIC LETTER ALEF WITH HAMZA BELOW إ
-        '\u0624', // ARABIC LETTER WAW WITH HAMZA ABOVE ؤ
-        '\u0671', // ARABIC LETTER ALEF WASLA ٱ
-        '\u064B', // ARABIC FATHATAN  ـً
-        '\u064C', // ARABIC DAMMATAN  ـٌ
-        '\u064D', // ARABIC KASRATAN  ـٍ
-        '\u064E', // ARABIC FATHA     ـَ
-        '\u064F', // ARABIC DAMMA     ـُ
-        '\u0650', // ARABIC KASRA     ـِ
-        '\u0651', // ARABIC SHADDA    ـّ
-        '\u0652', // ARABIC SUKUN     ـْ
-    };
-
-    /// <summary>
-    /// Validates the inner text of a <c>&lt;&lt;VERIFICATION&gt;&gt;</c> block produced
-    /// by the AI against the rules defined in the chat-instruction file:
-    /// the text must be Persian-only and contain none of <see cref="ArabicOnlyCharacters"/>.
-    /// Violations are logged but never thrown — the block is stripped from the visible
-    /// reply in every code path, so a malformed verification cannot reach the user.
-    /// Logging it here gives operators an early signal that the AI is drifting from the
-    /// instruction file and that the instruction needs to be tightened.
-    /// </summary>
-    private void ValidateAiVerificationText(string? verificationText)
-    {
-        if (string.IsNullOrWhiteSpace(verificationText))
-            return;
-
-        var offendingChars = new HashSet<char>();
-        foreach (var c in verificationText)
-        {
-            if (Array.IndexOf(ArabicOnlyCharacters, c) >= 0)
-                offendingChars.Add(c);
-        }
-
-        if (offendingChars.Count == 0)
-            return;
-
-        var codepoints = string.Join(
-            ", ",
-            offendingChars.Select(c => $"U+{((int)c):X4} '{c}'"));
-
-        logger.LogWarning(
-            "AI <<VERIFICATION>> block violates the Persian-only rule from the instruction file. " +
-            "Offending Arabic-only character(s): {Codepoints}. Verification text: {Text}",
-            codepoints,
-            verificationText);
     }
 }
-
