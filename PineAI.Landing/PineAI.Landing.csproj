@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
@@ -12,13 +12,6 @@
 		<BlazorEnableCompression>true</BlazorEnableCompression>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<BlazorWebAssemblyLoadAllGlobalizationData>false</BlazorWebAssemblyLoadAllGlobalizationData>
-		<WasmEnableSIMD Condition="'$(Configuration)'=='Release'">true</WasmEnableSIMD>
-		<WasmStripILAfterAOT>true</WasmStripILAfterAOT>
-		<WasmFingerprintAssets>false</WasmFingerprintAssets>
-		<StaticWebAssetsFingerprintContent>false</StaticWebAssetsFingerprintContent>
-		<StaticWebAssetFingerprintingEnabled>false</StaticWebAssetFingerprintingEnabled>
-		<WasmApplicationEnvironmentName>$(Environment)</WasmApplicationEnvironmentName>
-		<WasmEnableWebcil Condition="'$(Configuration)'=='Release'">false</WasmEnableWebcil>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -29,8 +22,6 @@
 		<DebugType>none</DebugType>
 		<DebugSymbols>false</DebugSymbols>
 		<CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
-		<EmccLinkOptimizationFlag>-O3</EmccLinkOptimizationFlag>
-		<EmccCompileOptimizationFlag>-O3</EmccCompileOptimizationFlag>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -42,10 +33,5 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.8" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.8" PrivateAssets="all" />
 	</ItemGroup>
-
-	<!--<ItemGroup>
-		<BlazorWebAssemblyLazyLoad Include="System.Data.Common.wasm" />
-		<BlazorWebAssemblyLazyLoad Include="System.Private.Xml.wasm" />
-	</ItemGroup>-->
 
 </Project>
