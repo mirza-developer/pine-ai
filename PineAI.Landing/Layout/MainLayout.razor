@@ -5,15 +5,9 @@
     <div class="container header-inner">
         <a href="/" class="site-logo-link" aria-label="@Site.Name - صفحه اصلی">
             <span class="logo-icon" aria-hidden="true">
-                <svg viewBox="0 0 36 36" width="36" height="36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="36" height="36" rx="8" fill="#1A5C3A"/>
-                    <path d="M18 6 L24 14 L30 10 L26 22 L18 30 L10 22 L6 10 L12 14 Z" fill="#52B788" opacity=".9"/>
-                    <circle cx="18" cy="18" r="4" fill="white"/>
-                </svg>
+                <img src="/images/main/logo.png" alt="@Site.Name - لوگو" loading="lazy" height="50" width="100" />
             </span>
-            <span class="logo-text">@Site.NameEn</span>
         </a>
-
         <nav class="header-nav" role="navigation" aria-label="منوی اصلی">
             <ul>
                 <li><a href="#features">امکانات</a></li>
@@ -21,7 +15,6 @@
                 <li><a href="#contact" class="nav-cta">درخواست دمو</a></li>
             </ul>
         </nav>
-
         <button class="nav-toggle" aria-label="باز کردن منو" @onclick="ToggleNav">
             <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
                 <path stroke="currentColor" stroke-width="2" stroke-linecap="round"
