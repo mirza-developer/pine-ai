@@ -8,6 +8,7 @@ public class SiteSettings
     public string Domain { get; set; } = "https://pineai.ir";
     public string ContactApiUrl { get; set; } = string.Empty;
     public string BaleUrl { get; set; } = string.Empty;
+    public string TelegramUrl { get; set; } = string.Empty;
     public string InstagramUrl { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;

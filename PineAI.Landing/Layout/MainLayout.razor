@@ -57,6 +57,10 @@
                 {
                     <li><a href="@Site.BaleUrl" target="_blank" rel="noopener">پیام‌رسان بله</a></li>
                 }
+                @if (!string.IsNullOrEmpty(Site.TelegramUrl))
+                {
+                    <li><a href="@Site.TelegramUrl" target="_blank" rel="noopener">تلگرام</a></li>
+                }
                 @if (!string.IsNullOrEmpty(Site.InstagramUrl))
                 {
                     <li><a href="@Site.InstagramUrl" target="_blank" rel="noopener">اینستاگرام</a></li>

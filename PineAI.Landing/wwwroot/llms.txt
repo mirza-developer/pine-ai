@@ -1,6 +1,6 @@
 # PineAI (پاین‌ای)
 
-> PineAI is an intelligent customer conversations platform built exclusively for Iranian online stores. It combines interaction management, an AI-powered support chatbot on the Bale messenger, and a branded order-tracking page — all accessible from a single dashboard. The product UI is fully in Persian (Farsi) with RTL layout.
+> PineAI is an intelligent customer conversations platform built exclusively for Iranian online stores. It combines interaction management, an AI-powered support chatbot on the Bale messenger and Telegram, and a branded order-tracking page — all accessible from a single dashboard. The product UI is fully in Persian (Farsi) with RTL layout.
 
 ## Product
 
@@ -9,7 +9,7 @@
 ## Core Features
 
 - [Conversation & Messages Management — مدیریت تعاملات و پیام‌ها](https://pineai.ir/#features): Monitor all customer conversations at a glance. Manage chat histories, support requests, and order tracking inquiries in a unified panel. Features smart categorization and analyzes customer behavior and frequent needs.
-- [AI Support Bot — ربات پشتیبانی هوشمند](https://pineai.ir/#features): A 24/7 automated chatbot running on Bale (Iran's leading messaging platform), powered by a large language model. It queries live order data, answers common customer questions, and escalates complex queries to a human support agent. Supports both text and image messages. This is the most popular feature.
+- [AI Support Bot — ربات پشتیبانی هوشمند](https://pineai.ir/#features): A 24/7 automated chatbot running on Bale and Telegram, powered by a large language model. It queries live order data, answers common customer questions, and escalates complex queries to a human support agent. Supports both text and image messages. This is the most popular feature.
 - [Order Tracking System — سیستم رهگیری سفارش](https://pineai.ir/#features): A white-label, store-branded tracking page for end customers. Customers look up their order status using an order code, mobile number, or email address, and receive the postal tracking code with a one-tap copy action.
 
 ## Onboarding
@@ -19,7 +19,7 @@
 ## Why PineAI
 
 - Fully Persian (Farsi) UI and RTL layout — no extra configuration needed.
-- Native integration with Bale, the most widely used Iranian messaging app.
+- Native integration with Bale and Telegram messaging apps.
 - AI-driven support bot with custom per-store instructions and live database access.
 - Supports both SQL Server and SQLite backends for flexible infrastructure choices.
 - Complete white-label customization: brand colors, UI content, and bot personality per store.
