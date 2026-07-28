@@ -210,10 +210,40 @@ public class BotUpdateHandler(BaleBotClient botClient,
                     : $"🔍 محصولی برای «{query}» یافت نشد.");
             }
 
-            var productBlock = string.Join("\n\n", productLines);
-            visibleText = string.IsNullOrWhiteSpace(visibleText)
-                ? productBlock
-                : visibleText + "\n\n" + productBlock;
+            if (productQueries.Count > 1)
+            {
+                // Comparison request: feed all product data back to the AI so it can
+                // write a proper comparative analysis in Persian.
+                var dataBlock = string.Join("\n\n", productLines);
+                var comparisonPrompt =
+                    $"[داده سیستم - نتایج جستجوی محصولات برای مقایسه]\n\n{dataBlock}\n\n" +
+                    "بر اساس داده‌های بالا، مقایسه جامع و مفیدی از این محصولات برای کاربر بنویس. " +
+                    "شباهت‌ها و تفاوت‌های کلیدی (قیمت، برند، رنگ، سایز، جنس پارچه، موجودی) را به‌صورت واضح بیان کن.";
+
+                var currentSession = sessionStore.GetSession(chatId);
+                var comparisonResponse = await agentService.SendWithSessionAsync(currentSession, comparisonPrompt);
+
+                // Strip all command blocks from the comparison response — the AI should
+                // only produce readable comparison text here, not trigger further actions.
+                var comparisonText = ResponseBlockTools.StripPenaltyBlocks(comparisonResponse.ResponseText, out _);
+                comparisonText = ResponseBlockTools.StripOrderCodeBlocks(comparisonText);
+                comparisonText = ResponseBlockTools.StripFeedbackBlocks(comparisonText, out _);
+                comparisonText = ResponseBlockTools.StripVerificationBlocks(comparisonText, out _);
+                comparisonText = ResponseBlockTools.StripProductQueryBlocks(comparisonText);
+
+                // Persist the updated session from the second AI call.
+                sessionStore.SetSession(chatId, comparisonResponse.SerializedSession);
+
+                visibleText = string.IsNullOrWhiteSpace(comparisonText) ? dataBlock : comparisonText;
+            }
+            else
+            {
+                // Single-product lookup: just append the formatted product details.
+                var productBlock = productLines[0];
+                visibleText = string.IsNullOrWhiteSpace(visibleText)
+                    ? productBlock
+                    : visibleText + "\n\n" + productBlock;
+            }
         }
 
         // If the AI signalled one or more order codes, resolve them from the DB
