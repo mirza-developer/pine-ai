@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PineAI.Persistence.Services;
 
@@ -11,9 +12,11 @@ using PineAI.Persistence.Services;
 namespace PineAI.Persistence.Migrations
 {
     [DbContext(typeof(PineAIDbContext))]
-    partial class PineAIDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260728141237_AddProductTable")]
+    partial class AddProductTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
