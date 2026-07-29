@@ -196,6 +196,7 @@ public class BotUpdateHandler(BaleBotClient botClient,
                 var products = await dbContext.Product
                     .AsNoTracking()
                     .Where(p =>
+                        EF.Functions.Like(p.ProductName, $"%{query}%") ||
                         EF.Functions.Like(p.Category, $"%{query}%") ||
                         EF.Functions.Like(p.Brand ?? "", $"%{query}%") ||
                         EF.Functions.Like(p.Color ?? "", $"%{query}%") ||
@@ -602,7 +603,7 @@ public class BotUpdateHandler(BaleBotClient botClient,
         for (var i = 0; i < products.Count; i++)
         {
             var p = products[i];
-            var parts = new List<string> { $"\n📌 محصول {i + 1}:" };
+            var parts = new List<string> { $"\n📌 محصول {i + 1}: {p.ProductName}" };
 
             if (!string.IsNullOrWhiteSpace(p.ProductCode))
                 parts.Add($"کد محصول: {p.ProductCode}");

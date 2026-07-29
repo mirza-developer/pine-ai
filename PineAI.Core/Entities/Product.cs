@@ -9,6 +9,10 @@ public class Product : IBaseEntity
     public string? ProductCode { get; set; }
 
     [Required]
+    [StringLength(256)]
+    public string ProductName { get; set; } = string.Empty;
+
+    [Required]
     [StringLength(128)]
     public string Category { get; set; } = string.Empty;
 
