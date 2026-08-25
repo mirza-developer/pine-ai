@@ -27,6 +27,8 @@ try
     builder.Services.Configure<BackupSettings>(
         builder.Configuration.GetSection("BackupSettings"));
 
+    builder.Services.AddHttpClient();
+
     builder.Services.AddHostedService<Worker>();
 
     var host = builder.Build();

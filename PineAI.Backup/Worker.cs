@@ -1,12 +1,20 @@
 using System.IO.Compression;
-using FluentFTP;
+using System.Net.Http.Headers;
+using System.Text.Json;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace PineAI.Backup;
 
-public class Worker(ILogger<Worker> logger, IOptions<BackupSettings> options, IConfiguration configuration) : BackgroundService
+public class Worker(
+    ILogger<Worker> logger,
+    IOptions<BackupSettings> options,
+    IConfiguration configuration,
+    IHttpClientFactory httpClientFactory) : BackgroundService
 {
+    private const long MaxBaleDocumentSizeBytes = 50 * 1024 * 1024;
+
     private readonly BackupSettings _settings = options.Value;
     private readonly string _connectionString = configuration.GetConnectionString("DefaultConnection");
 
@@ -56,8 +64,8 @@ public class Worker(ILogger<Worker> logger, IOptions<BackupSettings> options, IC
             ZipBackupFile(bakFilePath, zipFilePath);
             logger.LogInformation("Compressed to: {File}", zipFilePath);
 
-            logger.LogInformation("Uploading to FTP: {Host}", _settings.Ftp.Host);
-            await UploadToFtpAsync(zipFilePath, zipFileName, cancellationToken);
+            logger.LogInformation("Sending backup to Bale chat: {ChatId}", _settings.Bale.ChatId);
+            await SendToBaleAsync(zipFilePath, zipFileName, cancellationToken);
             logger.LogInformation("Upload complete: {File}", zipFileName);
         }
         catch (OperationCanceledException)
@@ -98,22 +106,41 @@ public class Worker(ILogger<Worker> logger, IOptions<BackupSettings> options, IC
         zip.CreateEntryFromFile(bakFilePath, Path.GetFileName(bakFilePath), CompressionLevel.Optimal);
     }
 
-    private async Task UploadToFtpAsync(string localFilePath, string remoteFileName, CancellationToken cancellationToken)
+    private async Task SendToBaleAsync(string localFilePath, string remoteFileName, CancellationToken cancellationToken)
     {
-        var config = new FtpConfig
+        var fileInfo = new FileInfo(localFilePath);
+        if (fileInfo.Length > MaxBaleDocumentSizeBytes)
         {
-            EncryptionMode = FtpEncryptionMode.None,
-            ValidateAnyCertificate = true,
-            DataConnectionType = FtpDataConnectionType.PASV,
+            throw new InvalidOperationException(
+                $"Backup file '{remoteFileName}' is {fileInfo.Length} bytes, which exceeds the {MaxBaleDocumentSizeBytes} byte limit for Bale documents.");
+        }
+
+        var client = httpClientFactory.CreateClient();
+        var requestUrl = $"https://tapi.bale.ai/bot{_settings.Bale.BotToken}/sendDocument";
+
+        using var content = new MultipartFormDataContent
+        {
+            { new StringContent(_settings.Bale.ChatId), "chat_id" }
         };
 
-        using var ftp = new AsyncFtpClient(_settings.Ftp.Host, _settings.Ftp.Username, _settings.Ftp.Password, _settings.Ftp.Port, config);
-        await ftp.Connect(cancellationToken);
+        await using var fileStream = File.OpenRead(localFilePath);
+        using var fileContent = new StreamContent(fileStream);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/zip");
+        content.Add(fileContent, "document", remoteFileName);
 
-        var remotePath = $"{_settings.Ftp.RemotePath.TrimEnd('/')}/{remoteFileName}";
-        await ftp.UploadFile(localFilePath, remotePath, FtpRemoteExists.Overwrite, true, FtpVerify.None, token: cancellationToken);
+        using var response = await client.PostAsync(requestUrl, content, cancellationToken);
+        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        await ftp.Disconnect(cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        using var document = JsonDocument.Parse(responseBody);
+        if (!document.RootElement.TryGetProperty("ok", out var okProperty) || !okProperty.GetBoolean())
+        {
+            var description = document.RootElement.TryGetProperty("description", out var descriptionProperty)
+                ? descriptionProperty.GetString()
+                : "unknown error";
+            throw new InvalidOperationException($"Bale sendDocument failed: {description}");
+        }
     }
 
     private void TryDeleteFile(string path)
