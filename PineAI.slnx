@@ -1,8 +1,8 @@
 <Solution>
   <Folder Name="/Solution Items/" />
-  <Folder Name="/Solution Items/Docs/" />
-  <Folder Name="/Solution Items/Docs/Bale/">
-    <File Path="bale-docs.html" />
+  <Folder Name="/Solution Items/Docs/">
+    <File Path="docs/api-notify-order.md" />
+    <File Path="docs/bale-docs.md" />
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/Application/">
